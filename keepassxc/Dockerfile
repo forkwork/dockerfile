@@ -9,7 +9,7 @@
 #		jess/keepassxc
 #
 FROM alpine:latest
-LABEL maintainer "Christian Koep <christiankoep@gmail.com>"
+LABEL maintainer "Md Sulaiman <dev.sulaiman@icloud.com>"
 
 ENV KEEPASSXC_VERSION 2.5.4
 

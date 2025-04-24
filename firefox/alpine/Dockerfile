@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-LABEL maintainer "Christian Koep <christiankoep@gmail.com>"
+LABEL maintainer "Md Sulaiman <dev.sulaiman@icloud.com>"
 
 RUN apk add --no-cache \
 	alsa-lib \

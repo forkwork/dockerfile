@@ -1,5 +1,5 @@
 # DESCRIPTION:	Create sublime-text 3 container with its dependencies (https://www.sublimetext.com/3)
-# AUTHORS:		Christian Koep <christiankoep@gmail.com>, Chuck Knox <charles.m.knox@gmail.com>
+# AUTHORS:		Md Sulaiman <dev.sulaiman@icloud.com>, Chuck Knox <charles.m.knox@gmail.com>
 # USAGE:
 #	# Build sublime-text 3 image
 #	docker build -t sublime-text:3 .
@@ -24,7 +24,7 @@
 #
 
 FROM debian:bullseye-slim
-LABEL maintainer "Christian Koep <christiankoep@gmail.com>"
+LABEL maintainer "Md Sulaiman <dev.sulaiman@icloud.com>"
 
 RUN apt-get update && apt-get -y install \
 	apt-transport-https \
