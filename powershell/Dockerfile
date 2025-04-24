@@ -1,5 +1,5 @@
 FROM debian:stretch-slim
-LABEL maintainer "Christian Koep <christiankoep@gmail.com>"
+LABEL maintainer "Md Sulaiman <dev.sulaiman@icloud.com>"
 
 ENV POWERSHELL_VERSION 7.0.1
 

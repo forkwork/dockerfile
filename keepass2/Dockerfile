@@ -1,5 +1,5 @@
 # DESCRIPTION:	Create keepass2 container with its dependencies
-# AUTHOR:		Christian Koep <christiankoep@gmail.com>
+# AUTHOR:		Md Sulaiman <dev.sulaiman@icloud.com>
 # USAGE:
 #	# Build keepass2 image
 #	docker build -t keepass2 .
@@ -19,7 +19,7 @@
 #
 
 FROM debian:sid-slim
-LABEL maintainer "Christian Koep <christiankoep@gmail.com>"
+LABEL maintainer "Md Sulaiman <dev.sulaiman@icloud.com>"
 
 ENV DEBIAN_FRONTEND noninteractive
 

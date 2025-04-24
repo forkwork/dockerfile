@@ -2,60 +2,70 @@
 set -e
 set -o pipefail
 
+# Path to this script
 SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
-DOCKER_REGISTRY_URL="${DOCKER_REGISTRY_URL:-docker.io}"
-JOBS=${JOBS:-2}
+JOBS="${JOBS:-2}"
 
+# Errors file
 ERRORS="$(pwd)/errors"
 
+# Check for GNU Parallel
+if ! command -v parallel &> /dev/null; then
+  echo "[ERROR] GNU Parallel is required but not installed. Please install it and retry." >&2
+  exit 2
+fi
+
+# Clear errors file at the start
+
+
 build_and_push(){
-	base=$1
-	suite=$2
-	build_dir=$3
+  local base="$1"
+  local suite="$2"
+  local build_dir="$3"
 
-	echo "Building ${REPO_URL}/${base}:${suite} for context ${build_dir}"
-	docker build --rm --force-rm -t "${REPO_URL}/${base}:${suite}" "${build_dir}" || return 1
+  echo "Building ${REPO_URL}/${base}:${suite} for context ${build_dir}"
+  # Build the Docker image
+  docker build --rm --force-rm -t "${REPO_URL}/${base}:${suite}" "${build_dir}" || return 1
 
-	# on successful build, push the image
-	echo "                       ---                                   "
-	echo "Successfully built ${base}:${suite} with context ${build_dir}"
-	echo "                       ---                                   "
+  # On successful build, push the image
+  echo "                       ---                                   "
+  echo "Successfully built ${base}:${suite} with context ${build_dir}"
+  echo "                       ---                                   "
 
-	# try push a few times because notary server sometimes returns 401 for
-	# absolutely no reason
-	n=0
-	until [ $n -ge 5 ]; do
-		docker push --disable-content-trust=false "${REPO_URL}/${base}:${suite}" && break
-		echo "Try #$n failed... sleeping for 15 seconds"
-		n=$((n+1))
-		sleep 15
-	done
+  # Try push a few times because notary server sometimes returns 401 for no reason
+  local n=0
+  until [ "$n" -ge 5 ]; do
+    docker push --disable-content-trust=false "${REPO_URL}/${base}:${suite}" && break
+    echo "Try #$n failed... sleeping for 15 seconds"
+    n=$((n+1))
+    sleep 15
+  done
 
-	# also push the tag latest for "stable" (chrome), "tools" (wireguard) or "3.5" tags for zookeeper
-	if [[ "$suite" == "stable" ]] || [[ "$suite" == "3.6" ]] || [[ "$suite" == "tools" ]]; then
-		docker tag "${REPO_URL}/${base}:${suite}" "${REPO_URL}/${base}:latest"
-		docker push --disable-content-trust=false "${REPO_URL}/${base}:latest"
-	fi
+  # Also push the tag latest for certain suites
+  if [[ "$suite" == "stable" ]] || [[ "$suite" == "3.6" ]] || [[ "$suite" == "tools" ]]; then
+    docker tag "${REPO_URL}/${base}:${suite}" "${REPO_URL}/${base}:latest"
+    docker push --disable-content-trust=false "${REPO_URL}/${base}:latest"
+  fi
 }
 
 dofile() {
-	f=$1
-	image=${f%Dockerfile}
-	base=${image%%\/*}
-	build_dir=$(dirname "$f")
-	suite=${build_dir##*\/}
+	local f="$1"
+	local image="${f%Dockerfile}"
+	local base="${image%%/*}"
+	local build_dir
+	build_dir="$(dirname "$f")"
+	local suite
+	suite="${build_dir##*/}"
 
 	if [[ -z "$suite" ]] || [[ "$suite" == "$base" ]]; then
 		suite=latest
 	fi
 
-	{
-		$SCRIPT build_and_push "${base}" "${suite}" "${build_dir}"
-	} || {
-	# add to errors
-	echo "${base}:${suite}" >> "$ERRORS"
-}
-echo
+	# Call build_and_push and record errors if any
+	if ! "$SCRIPT" build_and_push "$base" "$suite" "$build_dir"; then
+		echo "$base:$suite" >> "$ERRORS"
+	fi
+
 echo
 }
 
